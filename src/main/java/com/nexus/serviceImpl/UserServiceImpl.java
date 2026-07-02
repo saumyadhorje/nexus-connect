@@ -1,10 +1,15 @@
 package com.nexus.serviceImpl;
 
+import com.nexus.dto.LoginRequest;
+import com.nexus.dto.LoginResponse;
 import com.nexus.dto.RegistrationResponse;
 import com.nexus.dto.UserRegistrationRequest;
 import com.nexus.entity.User;
 import com.nexus.exception.EmailAlreadyExistsException;
+import com.nexus.exception.InvalidPasswordException;
+import com.nexus.exception.UserNotFoundException;
 import com.nexus.repository.UserRepository;
+import com.nexus.security.JwtService;
 import com.nexus.service.UserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,11 +21,13 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public UserServiceImpl(UserRepository userRepository,
-                           BCryptPasswordEncoder passwordEncoder) {
+                           BCryptPasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -48,6 +55,31 @@ public class UserServiceImpl implements UserService {
                 savedUser.getId(),
                 savedUser.getName(),
                 "User registered successfully!"
+        );
+    }
+
+    @Override
+    public LoginResponse loginUser(LoginRequest request) {
+
+        Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
+
+        if (userOptional.isEmpty()) {
+            throw new UserNotFoundException("User not found");
+        }
+
+        User user = userOptional.get();
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            //throw new RuntimeException("Invalid password");
+            throw new InvalidPasswordException("Invalid password");
+        }
+
+       // return new LoginResponse("Login successful");
+        String token = jwtService.generateToken(user);
+
+        return new LoginResponse(
+                "Login successful",
+                token
         );
     }
 }

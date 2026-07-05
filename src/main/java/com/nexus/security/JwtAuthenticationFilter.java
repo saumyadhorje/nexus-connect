@@ -15,33 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
-//The filter runs before your controller.
-//
-//It does this:
-//
-//Incoming Request
-//        │
-//        ▼
-//Read Authorization Header
-//        │
-//        ▼
-//Extract JWT
-//        │
-//        ▼
-//Extract Email
-//        │
-//        ▼
-//Find User in Database
-//        │
-//        ▼
-//Validate JWT
-//        │
-//        ▼
-//Tell Spring:
-//"This user is authenticated."
-//        │
-//        ▼
-//Continue to Controller
+
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -50,7 +24,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public JwtAuthenticationFilter(JwtService jwtService,
                                    UserRepository userRepository) {
-
         this.jwtService = jwtService;
         this.userRepository = userRepository;
     }
@@ -61,38 +34,60 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
+        System.out.println("==================================");
+        System.out.println("REQUEST: " + request.getRequestURI());
+
         final String authHeader = request.getHeader("Authorization");
+        System.out.println("HEADER: " + authHeader);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("No Bearer token found.");
             filterChain.doFilter(request, response);
             return;
         }
 
         String jwt = authHeader.substring(7);
+        System.out.println("JWT: " + jwt);
 
-        String email = jwtService.extractUsername(jwt);
+        try {
 
-        Optional<User> userOptional = userRepository.findByEmail(email);
+            String email = jwtService.extractUsername(jwt);
+            System.out.println("EMAIL: " + email);
 
-        if (userOptional.isPresent()) {
+            Optional<User> userOptional = userRepository.findByEmail(email);
+            System.out.println("USER FOUND: " + userOptional.isPresent());
 
-            User user = userOptional.get();
+            if (userOptional.isPresent()) {
 
-            if (jwtService.isTokenValid(jwt, user)) {
+                User user = userOptional.get();
 
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                user,
-                                null,
-                                Collections.emptyList()
-                        );
+                boolean valid = jwtService.isTokenValid(jwt, user);
+                System.out.println("TOKEN VALID: " + valid);
 
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
+                if (valid) {
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    user,
+                                    null,
+                                    Collections.emptyList()
+                            );
+
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                    System.out.println("AUTHENTICATION SET SUCCESSFULLY");
+                } else {
+                    System.out.println("TOKEN INVALID");
+                }
             }
+
+        } catch (Exception e) {
+            System.out.println("JWT ERROR: " + e.getMessage());
+            e.printStackTrace();
         }
 
         filterChain.doFilter(request, response);

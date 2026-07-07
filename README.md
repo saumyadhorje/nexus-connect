@@ -1,385 +1,217 @@
-# nexus-connect
+# Nexus – Social Media Backend (Spring Boot + JWT)
 
+A production-inspired backend application that provides secure user authentication, post management, search, pagination, sorting, and JWT-based authorization using Spring Boot and MySQL.
 
-A full-stack professional social networking platform inspired by LinkedIn, built using **Spring Boot**, **React**, **MySQL**, **Spring Security**, and **JWT Authentication**.
+---
+## Features
 
-Nexus enables users to build professional profiles, create and share posts, connect with other professionals, and interact through likes, comments, and notifications. The backend follows a scalable layered architecture with secure JWT-based authentication, while the frontend provides a modern and responsive user experience.
+### Authentication & Security
+- User Registration
+- User Login
+- JWT Authentication
+- BCrypt Password Encryption
+- Protected Endpoints using Spring Security
+- Authorization (Users can update/delete only their own posts)
+
+### User Management
+- Register new users
+- Login and receive JWT token
+- Search users by name
+
+### Post Management
+- Create posts
+- View all posts
+- View a post by ID
+- Update own posts
+- Delete own posts
+
+### Search
+- Search posts by keyword
+- Search users by name
+
+### Pagination & Sorting
+- Paginated post retrieval
+- Dynamic sorting (Ascending/Descending)
+
+### API Documentation
+- Swagger UI Integration
+- JWT Authorization support in Swagger
+
+### Exception Handling
+- Global Exception Handler
+- Custom Exceptions
+- Bean Validation
 
 ---
 
-# ✨ Features
+## Tech Stack
 
-## 👤 User Management
-
-* User Registration
-* Secure Login & Logout
-* JWT Authentication
-* BCrypt Password Encryption
-* Profile Management
-* Change Password
-* Upload Profile Picture
-* Delete Account
-
----
-
-## 📝 Posts
-
-* Create Posts
-* Edit Posts
-* Delete Posts
-* View Feed
-* Like & Unlike Posts
-* Comment on Posts
-* Reply to Comments
+- Java 21
+- Spring Boot
+- Spring Security
+- Spring Data JPA
+- JWT (JSON Web Token)
+- MySQL
+- Maven
+- Swagger / OpenAPI
+- Hibernate
 
 ---
 
-## 🤝 Networking
-
-* Follow / Unfollow Users
-* View Followers & Following
-* Search Users
-* Discover Professionals
-
----
-
-## 🔔 Notifications
-
-* Like Notifications
-* Comment Notifications
-* Follow Notifications
-
----
-
-## 🔒 Security
-
-* Spring Security
-* JWT Authentication
-* Stateless Sessions
-* Password Hashing with BCrypt
-* Global Exception Handling
-* Request Validation
-
----
-
-# 🛠 Tech Stack
-
-### Backend
-
-* Java 17
-* Spring Boot
-* Spring Security
-* Spring Data JPA
-* Hibernate
-* JWT (JJWT)
-* MySQL
-* Maven
-* Lombok
-
-### Frontend
-
-* React.js
-* HTML5
-* CSS3
-* JavaScript (ES6+)
-* Axios
-
-### Tools
-
-* Git
-* GitHub
-* Postman / Thunder Client
-* IntelliJ IDEA
-* VS Code
-* MySQL Workbench
-
----
-
-# 📂 Project Structure
+## Project Structure
 
 ```
-Nexus
-│
-├── backend
-│   ├── config
-│   ├── controller
-│   ├── dto
-│   ├── entity
-│   ├── exception
-│   ├── repository
-│   ├── security
-│   ├── service
-│   └── serviceImpl
-│
-├── frontend
-│   ├── components
-│   ├── pages
-│   ├── services
-│   ├── hooks
-│   ├── assets
-│   └── utils
-│
-└── README.md
+src
+├── config
+├── controller
+├── dto
+│   ├── request
+│   └── response
+├── entity
+├── exception
+├── mapper
+├── repository
+├── security
+├── service
+├── serviceImpl
+└── resources
 ```
 
 ---
 
-#  Architecture
+## API Endpoints
+
+### Authentication
+
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/api/v1/users/register` | Register a new user |
+| POST | `/api/v1/users/login` | Login and receive JWT |
+
+---
+
+### Users
+
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/api/v1/users/search?keyword=` | Search users |
+
+---
+
+### Posts
+
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/api/v1/posts` | Create post |
+| GET | `/api/v1/posts` | Get all posts |
+| GET | `/api/v1/posts/{id}` | Get post by ID |
+| PUT | `/api/v1/posts/{id}` | Update own post |
+| DELETE | `/api/v1/posts/{id}` | Delete own post |
+| GET | `/api/v1/posts/search?keyword=` | Search posts |
+
+---
+
+## Pagination
+
+Retrieve posts with pagination.
+
+Example:
 
 ```
-                React Frontend
-                      │
-                      ▼
-               REST API Requests
-                      │
-                      ▼
-             Spring Boot Backend
-                      │
-      ┌───────────────┼────────────────┐
-      │               │                │
-      ▼               ▼                ▼
- Controllers      Services       Security
-      │               │                │
-      ▼               ▼                ▼
-Repositories ───────► MySQL ◄────── JWT
+GET /api/v1/posts?page=0&size=5
 ```
 
 ---
 
-# 🔐 Authentication Flow
+## Sorting
+
+Retrieve posts sorted by creation date.
+
+Newest first:
 
 ```
-Register User
-      │
-      ▼
-Validate Request
-      │
-      ▼
-Hash Password (BCrypt)
-      │
-      ▼
-Store User in Database
+GET /api/v1/posts?page=0&size=5&sort=desc
+```
 
-────────────────────────────────────
+Oldest first:
 
-Login
-      │
-      ▼
-Verify Credentials
-      │
-      ▼
-Generate JWT
-      │
-      ▼
-Return Token
-
-────────────────────────────────────
-
-Frontend stores JWT
-
-────────────────────────────────────
-
-Every Protected Request
-
-Authorization: Bearer <JWT>
-
-────────────────────────────────────
-
-JWT Validation
-
-────────────────────────────────────
-
-Access Granted
+```
+GET /api/v1/posts?page=0&size=5&sort=asc
 ```
 
 ---
-
-# 📡 REST API Endpoints
 
 ## Authentication
 
-| Method | Endpoint               | Description         |
-| ------ | ---------------------- | ------------------- |
-| POST   | /api/v1/users/register | Register a new user |
-| POST   | /api/v1/users/login    | Login user          |
-| GET    | /api/v1/users/me       | Get logged-in user  |
+After logging in, include the JWT token in every protected request.
 
----
-
-## Profile
-
-| Method | Endpoint        |
-| ------ | --------------- |
-| GET    | /api/v1/profile |
-| PUT    | /api/v1/profile |
-| DELETE | /api/v1/profile |
-
----
-
-## Posts
-
-| Method | Endpoint           |
-| ------ | ------------------ |
-| POST   | /api/v1/posts      |
-| GET    | /api/v1/posts      |
-| GET    | /api/v1/posts/{id} |
-| PUT    | /api/v1/posts/{id} |
-| DELETE | /api/v1/posts/{id} |
-
----
-
-## Comments
-
-| Method | Endpoint              |
-| ------ | --------------------- |
-| POST   | /api/v1/comments      |
-| PUT    | /api/v1/comments/{id} |
-| DELETE | /api/v1/comments/{id} |
-
----
-
-## Likes
-
-| Method | Endpoint                |
-| ------ | ----------------------- |
-| POST   | /api/v1/posts/{id}/like |
-| DELETE | /api/v1/posts/{id}/like |
-
----
-
-## Follow
-
-| Method | Endpoint                     |
-| ------ | ---------------------------- |
-| POST   | /api/v1/users/{id}/follow    |
-| DELETE | /api/v1/users/{id}/follow    |
-| GET    | /api/v1/users/{id}/followers |
-| GET    | /api/v1/users/{id}/following |
-
----
-
-# 🗄 Database Design
-
-### User
-
-* id
-* name
-* email
-* password
-* bio
-* profilePicture
-* createdAt
-
-### Post
-
-* id
-* content
-* imageUrl
-* createdAt
-* updatedAt
-* userId
-
-### Comment
-
-* id
-* content
-* createdAt
-* postId
-* userId
-
-### Like
-
-* id
-* postId
-* userId
-
-### Follow
-
-* followerId
-* followingId
-
-### Notification
-
-* id
-* message
-* type
-* createdAt
-* isRead
-
----
-
-# 🚀 Getting Started
-
-## Clone the Repository
-
-```bash
-git clone https://github.com/your-username/nexus.git
+```
+Authorization: Bearer <your_jwt_token>
 ```
 
-## Navigate to the Project
+Swagger also supports JWT authentication through the **Authorize** button.
+
+---
+
+## Running the Project
+
+### Clone Repository
+
+```bash
+git clone https://github.com/<your-username>/nexus.git
+```
+
+### Navigate
 
 ```bash
 cd nexus
 ```
 
-## Configure MySQL
+### Configure Database
 
-Update the database configuration inside:
+Create a PostgreSQL database.
 
-```
-application.properties
-```
+Update `application.properties`:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/nexusdb
-spring.datasource.username=root
-spring.datasource.password=your_password
+spring.datasource.url=jdbc:postgresql://localhost:5432/nexus
+spring.datasource.username=YOUR_USERNAME
+spring.datasource.password=YOUR_PASSWORD
 ```
 
-## Run Backend
+### Run
 
 ```bash
 mvn spring-boot:run
 ```
 
-## Run Frontend
+or directly from your IDE.
 
-```bash
-npm install
-npm start
+---
+
+## Swagger Documentation
+
+Once the application is running:
+
+```
+http://localhost:8080/swagger-ui/index.html
 ```
 
 ---
 
-# 🧪 Testing
+## Future Improvements
 
-The REST APIs can be tested using:
-
-* Thunder Client
-* Postman
-
----
-
-# 🔮 Future Enhancements
-
-* Real-time Chat
-* AI-powered Feed Recommendations
-* Resume Upload
-* Skill Endorsements
-* Company Pages
-* WebSocket Notifications
-* Email Verification
-* Password Reset via Email
-* Two-Factor Authentication (2FA)
-* Docker & Kubernetes Deployment
-* CI/CD with GitHub Actions
-
+- Docker & Docker Compose
+- Microservices Architecture
+- API Gateway
+- Eureka Service Discovery
+- Refresh Token Authentication
+- Likes & Comments
+- Follow System
+- Cloud Deployment (AWS / Render)
 
 ---
 
-# 👨‍💻 Author
+## Author
 
 **Saumya Dhorje**
-
-Built to explore modern backend development using **Spring Boot**, **JWT Authentication**, **REST APIs**, **Spring Security**, and full-stack application development.
-

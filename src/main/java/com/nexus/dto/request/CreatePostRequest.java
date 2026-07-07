@@ -1,4 +1,4 @@
-package com.nexus.dto;
+package com.nexus.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

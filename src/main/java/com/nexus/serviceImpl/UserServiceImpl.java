@@ -1,19 +1,23 @@
 package com.nexus.serviceImpl;
 
-import com.nexus.dto.LoginRequest;
-import com.nexus.dto.LoginResponse;
-import com.nexus.dto.RegistrationResponse;
-import com.nexus.dto.UserRegistrationRequest;
+import com.nexus.dto.request.LoginRequest;
+import com.nexus.dto.request.UserRegistrationRequest;
+import com.nexus.dto.response.LoginResponse;
+import com.nexus.dto.response.RegistrationResponse;
+import com.nexus.dto.response.UserResponse;
 import com.nexus.entity.User;
 import com.nexus.exception.EmailAlreadyExistsException;
 import com.nexus.exception.InvalidPasswordException;
 import com.nexus.exception.UserNotFoundException;
+import com.nexus.mapper.mapper;
+import com.nexus.mapper.mapper;
 import com.nexus.repository.UserRepository;
 import com.nexus.security.JwtService;
 import com.nexus.service.UserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,7 +28,8 @@ public class UserServiceImpl implements UserService {
     private final JwtService jwtService;
 
     public UserServiceImpl(UserRepository userRepository,
-                           BCryptPasswordEncoder passwordEncoder, JwtService jwtService) {
+                           BCryptPasswordEncoder passwordEncoder,
+                           JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -43,10 +48,7 @@ public class UserServiceImpl implements UserService {
 
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-
-        // Hash the password before saving
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-
         user.setBio(request.getBio());
 
         User savedUser = userRepository.save(user);
@@ -70,16 +72,24 @@ public class UserServiceImpl implements UserService {
         User user = userOptional.get();
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            //throw new RuntimeException("Invalid password");
             throw new InvalidPasswordException("Invalid password");
         }
 
-       // return new LoginResponse("Login successful");
         String token = jwtService.generateToken(user);
 
         return new LoginResponse(
                 "Login successful",
                 token
         );
+    }
+
+    @Override
+    public List<UserResponse> searchUsers(String keyword) {
+
+        return userRepository
+                .findByNameContainingIgnoreCase(keyword)
+                .stream()
+                .map(mapper::toUserResponse)
+                .toList();
     }
 }

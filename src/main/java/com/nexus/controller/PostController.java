@@ -1,11 +1,12 @@
 package com.nexus.controller;
 
-import com.nexus.dto.CreatePostRequest;
-import com.nexus.dto.UpdatePostRequest;
-import com.nexus.entity.Post;
+import com.nexus.dto.request.CreatePostRequest;
+import com.nexus.dto.request.UpdatePostRequest;
+import com.nexus.dto.response.PostResponse;
 import com.nexus.entity.User;
 import com.nexus.service.PostService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -25,46 +26,51 @@ public class PostController {
 
     // Create Post
     @PostMapping
-    public ResponseEntity<Post> createPost(
+    public ResponseEntity<PostResponse> createPost(
             @Valid @RequestBody CreatePostRequest request,
             Authentication authentication) {
 
         User user = (User) authentication.getPrincipal();
 
-        Post post = postService.createPost(request, user);
+        PostResponse post = postService.createPost(request, user);
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(post);
+        return ResponseEntity.status(HttpStatus.CREATED).body(post);
     }
 
     // Get All Posts
     @GetMapping
-    public ResponseEntity<List<Post>> getAllPosts() {
+    public Page<PostResponse> getAllPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "desc") String sort) {
 
-        List<Post> posts = postService.getAllPosts();
-
-        return ResponseEntity.ok(posts);
+        return postService.getAllPosts(page, size, sort);
     }
+    @GetMapping("/search")
+    public List<PostResponse> searchPosts(
+            @RequestParam String keyword) {
+
+        return postService.searchPosts(keyword);
+    }
+    // Get Post By ID
     @GetMapping("/{id}")
-    public ResponseEntity<Post> getPostById(@PathVariable Long id) {
-
-        Post post = postService.getPostById(id);
-
-        return ResponseEntity.ok(post);
+    public PostResponse getPostById(@PathVariable Long id) {
+        return postService.getPostById(id);
     }
+
+    // Update Post
     @PutMapping("/{id}")
-    public ResponseEntity<Post> updatePost(
+    public PostResponse updatePost(
             @PathVariable Long id,
             @Valid @RequestBody UpdatePostRequest request,
             Authentication authentication) {
 
         User user = (User) authentication.getPrincipal();
 
-        Post updatedPost = postService.updatePost(id, request, user);
-
-        return ResponseEntity.ok(updatedPost);
+        return postService.updatePost(id, request, user);
     }
+
+    // Delete Post
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(
             @PathVariable Long id,
@@ -76,4 +82,5 @@ public class PostController {
 
         return ResponseEntity.noContent().build();
     }
+
 }

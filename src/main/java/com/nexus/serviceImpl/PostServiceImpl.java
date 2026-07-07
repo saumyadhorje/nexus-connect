@@ -1,15 +1,20 @@
 package com.nexus.serviceImpl;
 
-import com.nexus.dto.CreatePostRequest;
-import com.nexus.dto.UpdatePostRequest;
+import com.nexus.dto.request.CreatePostRequest;
+import com.nexus.dto.request.UpdatePostRequest;
+import com.nexus.dto.response.PostResponse;
 import com.nexus.entity.Post;
 import com.nexus.entity.User;
 import com.nexus.exception.PostNotFoundException;
+import com.nexus.mapper.mapper;
 import com.nexus.repository.PostRepository;
 import com.nexus.service.PostService;
-import org.springframework.stereotype.Service;
-import com.nexus.dto.UpdatePostRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -23,58 +28,79 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post createPost(CreatePostRequest request, User user) {
+    public PostResponse createPost(CreatePostRequest request, User user) {
 
         Post post = new Post();
-
         post.setContent(request.getContent());
         post.setUser(user);
 
-        return postRepository.save(post);
+        Post savedPost = postRepository.save(post);
+
+        return mapper.toPostResponse(savedPost);
     }
 
     @Override
-    public List<Post> getAllPosts() {
+    public Page<PostResponse> getAllPosts(int page, int size, String sortDir) {
 
-        return postRepository.findAllByOrderByCreatedAtDesc();
+        Sort sort = sortDir.equalsIgnoreCase("asc")
+                ? Sort.by("createdAt").ascending()
+                : Sort.by("createdAt").descending();
 
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return postRepository
+                .findAll(pageable)
+                .map(mapper::toPostResponse);
     }
-    @Override
-    public Post getPostById(Long id) {
 
-        return postRepository.findById(id)
-               // .orElseThrow(() -> new RuntimeException("Post not found"));
-        .orElseThrow(() -> new PostNotFoundException("Post not found"));
-
-    }
     @Override
-    public Post updatePost(Long id,
-                           UpdatePostRequest request,
-                           User loggedInUser) {
+    public PostResponse getPostById(Long id) {
 
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new PostNotFoundException("Post not found"));
 
-        // Check if the logged-in user owns the post
+        return mapper.toPostResponse(post);
+    }
+
+    @Override
+    public PostResponse updatePost(Long id,
+                                   UpdatePostRequest request,
+                                   User loggedInUser) {
+
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new PostNotFoundException("Post not found"));
+
         if (!post.getUser().getId().equals(loggedInUser.getId())) {
             throw new AccessDeniedException("You are not allowed to update this post");
         }
 
         post.setContent(request.getContent());
 
-        return postRepository.save(post);
+        Post savedPost = postRepository.save(post);
+
+        return mapper.toPostResponse(savedPost);
     }
+
     @Override
     public void deletePost(Long id, User loggedInUser) {
 
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new PostNotFoundException("Post not found"));
 
-        // Only the owner can delete
         if (!post.getUser().getId().equals(loggedInUser.getId())) {
             throw new AccessDeniedException("You are not allowed to delete this post");
         }
 
         postRepository.delete(post);
+    }
+
+    @Override
+    public List<PostResponse> searchPosts(String keyword) {
+
+        return postRepository
+                .findByContentContainingIgnoreCaseOrderByCreatedAtDesc(keyword)
+                .stream()
+                .map(mapper::toPostResponse)
+                .toList();
     }
 }

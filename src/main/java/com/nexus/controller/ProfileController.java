@@ -1,6 +1,8 @@
 package com.nexus.controller;
 
+import com.nexus.dto.response.UserResponse;
 import com.nexus.entity.User;
+import com.nexus.mapper.mapper;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,8 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProfileController {
 
     @GetMapping
-    public User getProfile(Authentication authentication) {
+    public UserResponse getProfile(Authentication authentication) {
 
-        return (User) authentication.getPrincipal();
+        User user = (User) authentication.getPrincipal();
+
+        return mapper.toUserResponse(user);
     }
 }

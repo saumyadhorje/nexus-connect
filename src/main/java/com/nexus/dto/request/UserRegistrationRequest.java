@@ -1,4 +1,4 @@
-package com.nexus.dto;
+package com.nexus.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

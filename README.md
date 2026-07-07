@@ -158,7 +158,7 @@ Swagger also supports JWT authentication through the **Authorize** button.
 ### Clone Repository
 
 ```bash
-git clone https://github.com/<your-username>/nexus.git
+git clone https://github.com/<saumyadhorje/nexus-connect.git
 ```
 
 ### Navigate
@@ -169,12 +169,12 @@ cd nexus
 
 ### Configure Database
 
-Create a PostgreSQL database.
+Create a MySQL database.
 
 Update `application.properties`:
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/nexus
+spring.datasource.url=jdbc:mysql://localhost:3306/nexus
 spring.datasource.username=YOUR_USERNAME
 spring.datasource.password=YOUR_PASSWORD
 ```
@@ -196,7 +196,6 @@ Once the application is running:
 ```
 http://localhost:8080/swagger-ui/index.html
 ```
-
 ---
 
 ## Future Improvements

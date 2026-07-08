@@ -197,10 +197,56 @@ Once the application is running:
 http://localhost:8080/swagger-ui/index.html
 ```
 ---
+## Docker Setup
 
+This project is fully containerized using **Docker** and **Docker Compose**.
+
+### Prerequisites
+
+- Docker Desktop
+- Docker Compose
+
+### Run with Docker
+
+```bash
+docker compose up --build
+```
+
+### Services
+
+| Service | Port |
+|---------|------|
+| Spring Boot API | 8081 |
+| MySQL | 3307 |
+
+### API Documentation
+
+Swagger UI:
+
+```
+http://localhost:8081/swagger-ui/index.html
+```
+
+### Stop Containers
+
+```bash
+docker compose down
+```
+
+### Tech Stack
+
+- Java 21
+- Spring Boot
+- Spring Security
+- JWT Authentication
+- Spring Data JPA
+- MySQL
+- Docker
+- Docker Compose
+- Swagger/OpenAPI
 ## Future Improvements
 
-- Docker & Docker Compose
+
 - Microservices Architecture
 - API Gateway
 - Eureka Service Discovery
